@@ -50,6 +50,9 @@ def main():
     download_time = dateutil.parser.parse(compiled_values[0][4])
    
     for i in range(num_tweets):
+        # col[2] reply to user id 
+        compiled_values[i][2] = 0 if compiled_values[i][2] == None else 1
+
         # col[3] text to len(text)
         compiled_values[i][3] = len(compiled_values[i][3])
         # col[4] created at to hrs since download
