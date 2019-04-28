@@ -18,12 +18,20 @@ def norm(x, train_stats):
 
 def nn():
 
-    directory = 'tweets_processed/abc.csv'
+    directory = 'tweets_processed/'
+
+    all_files = glob.glob(directory + "/*.csv")
 
     column_names = ['video_count', 'photo_count', 'reply_to_user_id', 'text', 'created_at', 'hashtags', 'reply_to_tweet_id', 'user_mentions', 'urls', 'reply_to_screen_name', 'retweet_count', 'tweet_id', 'favorite_count', 'statuses_count', 'description', 'friends_count', 'account_created_at', 'followers_count', 'screen_name', 'listed_count', 'id', 'name']
 
-    raw_dataset = pd.read_csv(directory, names=column_names)
-    dataset = raw_dataset.copy()
+    all_data = []
+    for filename in all_files:
+        df = pd.read_csv(filename, names=column_names)
+        all_data.append(df)
+    dataset = pd.concat(all_data, axis=0, ignore_index=True)
+
+    #raw_dataset = pd.read_csv(directory, names=column_names)
+    #dataset = raw_dataset.copy()
     print(dataset.tail())
 
     # to do: one hot encoding 
@@ -49,6 +57,7 @@ def nn():
     normed_test_data = norm(test_dataset, train_stats)
 
     print(normed_train_data.tail())
+    print(normed_test_data.tail())
 
     # build model
     model = keras.Sequential([
