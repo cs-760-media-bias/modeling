@@ -12,6 +12,7 @@ import glob
 import numpy as np
 from numpy import genfromtxt
 
+import time 
 
 def norm(x, train_stats):
   return (x - train_stats['mean']) / train_stats['std']
@@ -24,6 +25,9 @@ def nn():
 
     column_names = ['video_count', 'photo_count', 'reply_to_user_id', 'text', 'created_at', 'hashtags', 'reply_to_tweet_id', 'user_mentions', 'urls', 'reply_to_screen_name', 'retweet_count', 'tweet_id', 'favorite_count', 'statuses_count', 'description', 'friends_count', 'account_created_at', 'followers_count', 'screen_name', 'listed_count', 'id', 'name']
 
+
+    # delete reply to tweet id, reply to screen name, retweet count, tweet id
+
     all_data = []
     for filename in all_files:
         df = pd.read_csv(filename, names=column_names)
@@ -33,8 +37,6 @@ def nn():
     #raw_dataset = pd.read_csv(directory, names=column_names)
     #dataset = raw_dataset.copy()
     print(dataset.tail())
-
-    # to do: one hot encoding 
 
     # split into train and test
     train_dataset = dataset.sample(frac=0.8,random_state=0)
@@ -59,9 +61,14 @@ def nn():
     print(normed_train_data.tail())
     print(normed_test_data.tail())
 
+    # start time 
+    start = time.time()
+
+
     # build model
     model = keras.Sequential([
     layers.Dense(64, activation=tf.nn.relu, input_shape=[len(train_dataset.keys())]),
+    layers.Dense(64, activation=tf.nn.relu),
     layers.Dense(64, activation=tf.nn.relu),
     layers.Dense(1)
     ])
@@ -78,12 +85,15 @@ def nn():
     example_result = model.predict(example_batch)
     print(example_result)
 
+    # The patience parameter is the amount of epochs to check for improvement
+    early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+    
     # train model
-    EPOCHS = 5
+    EPOCHS = 100
 
     history = model.fit(
         normed_train_data, train_labels,
-        epochs=EPOCHS, validation_split = 0.2, verbose=0)
+        epochs=EPOCHS, validation_split = 0.2, verbose=0, callbacks=[early_stop])
 
     hist = pd.DataFrame(history.history)
     hist['epoch'] = history.epoch
@@ -94,7 +104,10 @@ def nn():
 
     print("Testing set Mean Abs Error: {:5.2f}".format(mae))
     
+    # end time 
+    end = time.time()
 
+    print("total runtime: ", end-start)
 if __name__== "__main__":
   nn()
 
