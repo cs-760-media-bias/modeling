@@ -52,45 +52,38 @@ def main():
     for i in range(num_tweets):
         # col[2] reply to user id 
         compiled_values[i][2] = 0 if compiled_values[i][2] == None else 1
-
         # col[3] text to len(text)
         compiled_values[i][3] = len(compiled_values[i][3])
         # col[4] created at to hrs since download
         created_time = dateutil.parser.parse(compiled_values[i][4])
         diff = download_time - created_time
         compiled_values[i][4] = float(diff.seconds)/360
-
         # col[5] hashtags to len(hashtags)
         compiled_values[i][5] = len(compiled_values[i][5])
-
         # col[6] replay to tweet id 1 if replay 0 if none
         compiled_values[i][6] = 0 if compiled_values[i][6] == None else 1
-
         # col[7] user_mentions to len(user_mentions)
         compiled_values[i][7] = len(compiled_values[i][7])
-
         # col[8] urls to 1 if url 0 if none
         compiled_values[i][8] = len(compiled_values[i][8])
-
         # col[9] replay to screen name 1 if reply 0 if none 
         compiled_values[i][9] = 0 if compiled_values[i][9] == None else 1
-
         # col[14] description to len(description)
         compiled_values[i][14] = len(compiled_values[i][14])
-
         # col[16] created at to days since created
         account_created = dateutil.parser.parse(compiled_values[i][16])
         account_diff = download_time - account_created
         compiled_values[i][16] = float(account_diff.days)
-
         # col[18] screen name
         compiled_values[i][18] = len(compiled_values[i][18])
-
         # col[21] user name
         compiled_values[i][21] = len(compiled_values[i][21])
     
     for j in range(len(compiled_attributes)):
         print(compiled_attributes[j], compiled_values[0][j])
+    
+    print(compiled_attributes)
+
     np.savetxt("tweets_processed/abc.csv", compiled_values, fmt='%5s', delimiter=",")
 
 
