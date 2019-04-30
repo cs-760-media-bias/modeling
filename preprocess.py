@@ -8,6 +8,9 @@ from tweet2vec.tweet2vec import tokenize, Doc2Vec
 IN_PATH = 'tweets_tidy'
 OUT_PATH = 'preprocessed'
 MOST_RECENT = None
+HISTORY_LENGTH = 100
+RETWEET_HISTORY = []
+FAVORITE_HISTORY = []
 TWEET2VEC_FILENAME = os.path.join('tweet2vec', 'models', 'doc2vec')
 TWEET2VEC_MODEL = Doc2Vec(TWEET2VEC_FILENAME)
 
@@ -45,6 +48,16 @@ TWEET_FEATURES = [
         'out_name': 'hours_since_post'
     },
     {
+        'json_name': 'created_at',
+        'prep': lambda created_at: [parse_datetime(created_at).hour],
+        'out_name': 'hour_in_day'
+    },
+    {
+        'json_name': 'created_at',
+        'prep': lambda created_at: [parse_datetime(created_at).weekday()],
+        'out_name': 'day_in_week',
+    },
+    {
         'json_name': 'text',
         'prep': lambda text: [len(text)],
         'out_name': 'text_length'
@@ -63,6 +76,17 @@ TWEET_FEATURES = [
         'json_name': 'urls',
         'prep': lambda urls: [len(urls)],
         'out_name': 'url_count'
+    },
+    {
+        'json_name': 'retweet_count',
+        'prep': lambda retweet_count: [update_history(RETWEET_HISTORY, retweet_count)],
+        'out_name': 'historical_retweet_count'
+    },
+    {
+        'json_name': 'favorite_count',
+        'prep': lambda favorite_count: [update_history(FAVORITE_HISTORY, favorite_count)],
+        'out_name': 'historical_favorite_count'
+
     },
     {'json_name': 'photo_count'},
     {'json_name': 'video_count'},
@@ -104,18 +128,36 @@ def get_value(parent, feature):
         return [value]
 
 
+def get_name(feature):
+    if 'out_name' in feature:
+        return feature['out_name']
+    else:
+        return feature['json_name']
+
+
 def parse_datetime(string):
     return datetime.strptime(string, '%a %b %d %X %z %Y')
-
-
-def hours_since(string):
-    datetime = parse_datetime(string)
-    return (MOST_RECENT - datetime).total_seconds() / 3600
 
 
 def days_since(string):
     datetime = parse_datetime(string)
     return (MOST_RECENT - datetime).days
+
+
+def hours_since(string):
+    datetime = parse_datetime(string)
+    return int((MOST_RECENT - datetime).total_seconds() / 3600)
+
+
+def update_history(history, count):
+    if len(history) < HISTORY_LENGTH:
+        history.append(count)
+        raise ValueError('insufficient history')
+    else:
+        output = np.mean(history)
+        history.append(count)
+        history.pop(0)
+        return output
 
 
 def preprocess():
@@ -147,15 +189,21 @@ def preprocess():
             with open(in_filename) as in_file:
                 tweets_json = json.load(in_file)
 
+            global RETWEET_HISTORY
+            global FAVORITE_HISTORY
+            RETWEET_HISTORY = []
+            FAVORITE_HISTORY = []
+
+            # Traverse the tweets in chronological order (assumes sorted input)
+            tweets_json['tweets'].reverse()
             for tweet in tweets_json['tweets']:
-                # Put this in a try block because Tweet2Vec.vectorize may fail
+                # Put this in a try block because prep functions may fail
                 try:
                     X_values = []
                     for feature in SOURCE_FEATURES:
                         X_values += get_value(source, feature)
                     for feature in USER_FEATURES:
-                        X_values += get_value(
-                            tweets_json['user'], feature)
+                        X_values += get_value(tweets_json['user'], feature)
                     for feature in TWEET_FEATURES:
                         X_values += get_value(tweet, feature)
                     X.append(X_values)
@@ -179,8 +227,28 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=1)
 
+    X_header = []
+    for feature in SOURCE_FEATURES:
+        X_header.append(get_name(feature))
+    for feature in USER_FEATURES:
+        X_header.append(get_name(feature))
+    for feature in TWEET_FEATURES:
+        X_header.append(get_name(feature))
+
+    y_header = []
+    for label in SOURCE_LABELS:
+        y_header.append(get_name(label))
+    for label in USER_LABELS:
+        y_header.append(get_name(label))
+    for label in TWEET_LABELS:
+        y_header.append(get_name(label))
+
     print('Writing data...')
-    np.savetxt(os.path.join(OUT_PATH, 'X_train.csv'), X_train, delimiter=',')
-    np.savetxt(os.path.join(OUT_PATH, 'X_test.csv'), X_test, delimiter=',')
-    np.savetxt(os.path.join(OUT_PATH, 'y_train.csv'), y_train, delimiter=',')
-    np.savetxt(os.path.join(OUT_PATH, 'y_test.csv'), y_test, delimiter=',')
+    np.savetxt(os.path.join(OUT_PATH, 'X_train.csv'), X_train,
+               delimiter=',', header=','.join(X_header))
+    np.savetxt(os.path.join(OUT_PATH, 'X_test.csv'), X_test,
+               delimiter=',', header=','.join(X_header))
+    np.savetxt(os.path.join(OUT_PATH, 'y_train.csv'), y_train,
+               delimiter=',', header=','.join(y_header))
+    np.savetxt(os.path.join(OUT_PATH, 'y_test.csv'), y_test,
+               delimiter=',', header=','.join(y_header))
