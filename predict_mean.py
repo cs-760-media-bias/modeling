@@ -1,19 +1,29 @@
 import numpy as np
 import os
-from sklearn.model_selection import train_test_split
+import utility
+
+IN_PATH = 'preprocessed'
+
+
+def predict_mean(y_train, y_test):
+    print('Running mean-value prediction model...')
+    mean = np.mean(y_train)
+    print('Mean value: ' + str(mean))
+    print('Training set:')
+    utility.print_error(np.repeat(mean, len(y_train)), y_train)
+    print('Test set:')
+    utility.print_error(np.repeat(mean, len(y_test)), y_test)
+    print()
+
 
 if __name__ == '__main__':
     print('Loading data...')
-    X = np.loadtxt(os.path.join('preprocessed', 'features.csv'))
-    y = np.loadtxt(os.path.join('preprocessed', 'labels.csv'))
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=1)
+    y_train = np.loadtxt(os.path.join(IN_PATH, 'y_train.csv'), delimiter=',')
+    y_test = np.loadtxt(os.path.join(IN_PATH, 'y_test.csv'), delimiter=',')
+    print()
 
-    print('Running mean-value prediction model...')
-    mean = np.mean(y_train)
-    predictions = np.repeat(mean, len(y_test))
+    # Use favorite_count as the label
+    y_train = y_train[:, 3]
+    y_test = y_test[:, 3]
 
-    mean_abs_error = np.mean(np.abs(predictions - y_test))
-    mean_test_label = np.mean(y_test)
-    print('Mean absolute error: \t' + str(mean_abs_error))
-    print('Mean test label value: \t' + str(mean_test_label))
+    predict_mean(y_train, y_test)
