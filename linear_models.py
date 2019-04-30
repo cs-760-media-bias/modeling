@@ -67,6 +67,7 @@ if __name__ == '__main__':
     scaler = preprocessing.StandardScaler().fit(X_train)
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
+    print()
 
     ordinary_least_squares(X_train, X_test, y_train, y_test)
 
