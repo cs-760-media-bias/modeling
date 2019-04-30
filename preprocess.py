@@ -2,15 +2,22 @@ from datetime import datetime, timedelta
 import json
 import numpy as np
 import os
+from sklearn.model_selection import train_test_split
 from tweet2vec.tweet2vec import tokenize, Doc2Vec
 
 IN_PATH = 'tweets_tidy'
 OUT_PATH = 'preprocessed'
-
-TIME_WINDOW_HOURS = 24
 MOST_RECENT = None
 TWEET2VEC_FILENAME = os.path.join('tweet2vec', 'models', 'doc2vec')
 TWEET2VEC_MODEL = Doc2Vec(TWEET2VEC_FILENAME)
+
+# Prep functions should return a list of one or more values
+SOURCE_FEATURES = [
+    # Objectivity - higher is more fact-based
+    {'json_name': 'ad_fontes_y'},
+    # Bias - negative is left, positive is right
+    {'json_name': 'ad_fontes_x'}
+]
 
 # Prep functions should return a list of one or more values
 USER_FEATURES = [
@@ -71,10 +78,22 @@ TWEET_FEATURES = [
     }
 ]
 
-# Prep functions should return a single value packaged as a list
-LABEL_FEATURE = {
-    'json_name': 'favorite_count'
-}
+# Prep functions should return a list of one or more values
+SOURCE_LABELS = [
+    # Objectivity - higher is more fact-based
+    {'json_name': 'ad_fontes_y'},
+    # Bias - negative is left, positive is right
+    {'json_name': 'ad_fontes_x'}
+]
+
+# Prep functions should return a list of one or more values
+USER_LABELS = []
+
+# Prep functions should return a list of one or more values
+TWEET_LABELS = [
+    {'json_name': 'retweet_count'},
+    {'json_name': 'favorite_count'}
+]
 
 
 def get_value(parent, feature):
@@ -118,7 +137,8 @@ def preprocess():
                     MOST_RECENT = created_at
 
     print('Preprocessing tweets...')
-    tweets = []
+    X = []
+    y = []
     for source in sources:
         for handle in source['twitter_handles']:
             in_filename = os.path.join(IN_PATH, handle + '.json')
@@ -127,32 +147,40 @@ def preprocess():
             with open(in_filename) as in_file:
                 tweets_json = json.load(in_file)
 
-            user = tweets_json['user']
-            user_values = []
-            for feature in USER_FEATURES:
-                user_values += get_value(user, feature)
-
             for tweet in tweets_json['tweets']:
+                # Put this in a try block because Tweet2Vec.vectorize may fail
                 try:
-                    tweet_values = []
-                    tweet_values += user_values
+                    X_values = []
+                    for feature in SOURCE_FEATURES:
+                        X_values += get_value(source, feature)
+                    for feature in USER_FEATURES:
+                        X_values += get_value(
+                            tweets_json['user'], feature)
                     for feature in TWEET_FEATURES:
-                        tweet_values += get_value(tweet, feature)
-                    tweet_values += get_value(tweet, LABEL_FEATURE)
-                    tweets.append(tweet_values)
+                        X_values += get_value(tweet, feature)
+                    X.append(X_values)
+
+                    y_values = []
+                    for label in SOURCE_LABELS:
+                        y_values += get_value(source, label)
+                    for label in USER_LABELS:
+                        y_values += get_value(tweets_json['user'], label)
+                    for label in TWEET_LABELS:
+                        y_values += get_value(tweet, label)
+                    y.append(y_values)
                 except:
                     continue
 
-    data = np.array(tweets, dtype='float')
-    return {
-        'features': data[:, :-1],
-        'labels': data[:, -1],
-    }
+    return np.array(X, dtype='float'), np.array(y, dtype='float')
 
 
 if __name__ == '__main__':
-    output = preprocess()
+    X, y = preprocess()
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=1)
+
     print('Writing data...')
-    for name, arr in output.items():
-        out_filename = os.path.join(OUT_PATH, name + '.csv')
-        np.savetxt(out_filename, arr)
+    np.savetxt(os.path.join(OUT_PATH, 'X_train.csv'), X_train, delimiter=',')
+    np.savetxt(os.path.join(OUT_PATH, 'X_test.csv'), X_test, delimiter=',')
+    np.savetxt(os.path.join(OUT_PATH, 'y_train.csv'), y_train, delimiter=',')
+    np.savetxt(os.path.join(OUT_PATH, 'y_test.csv'), y_test, delimiter=',')

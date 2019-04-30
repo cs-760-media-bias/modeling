@@ -3,6 +3,7 @@ import os
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 
+IN_PATH = 'preprocessed'
 
 def print_error(X_train, X_test, y_train, y_test, model):
     print('Model weights:')
@@ -44,7 +45,7 @@ def ridge_regression(X_train, X_test, y_train, y_test, alphas, cv):
 
 def lasso_regression(X_train, X_test, y_train, y_test, alphas, cv):
     print('Running lasso regression with ' +
-          str(cv) + '-fold cross-validation')
+          str(cv) + '-fold cross-validation...')
     print('Possible alpha values:')
     print(alphas)
 
@@ -56,10 +57,18 @@ def lasso_regression(X_train, X_test, y_train, y_test, alphas, cv):
 
 if __name__ == '__main__':
     print('Loading data...')
-    X = np.loadtxt(os.path.join('preprocessed', 'features.csv'))
-    y = np.loadtxt(os.path.join('preprocessed', 'labels.csv'))
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=1)
+    X_train = np.loadtxt(os.path.join(IN_PATH, 'X_train.csv'), delimiter=',')
+    X_test = np.loadtxt(os.path.join(IN_PATH, 'X_test.csv'), delimiter=',')
+    y_train = np.loadtxt(os.path.join(IN_PATH, 'y_train.csv'), delimiter=',')
+    y_test = np.loadtxt(os.path.join(IN_PATH, 'y_test.csv'), delimiter=',')
+
+    # Use all the features except ad_fontes_y and ad_fontes_x
+    X_train = X_train[:,2:]
+    X_test = X_test[:,2:]
+
+    # Use favorite_count as the label
+    y_train = y_train[:,3]
+    y_test = y_test[:,3]
 
     ordinary_least_squares(X_train, X_test, y_train, y_test)
 
