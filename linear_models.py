@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from sklearn import linear_model
+from sklearn import linear_model, preprocessing
 import utility
 
 IN_PATH = 'preprocessed'
@@ -61,6 +61,12 @@ if __name__ == '__main__':
     # Use favorite_count as the label
     y_train = y_train[:, 3]
     y_test = y_test[:, 3]
+
+    # Standardize data
+    print('Standardizing data...')
+    scaler = preprocessing.StandardScaler().fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
 
     ordinary_least_squares(X_train, X_test, y_train, y_test)
 
