@@ -9,9 +9,9 @@ IN_PATH = 'preprocessed'
 def print_results(X_train, X_test, y_train, y_test, model):
     print('Model weights:')
     print(model.coef_)
-    print('Training set error:')
+    print('Training set:')
     utility.print_error(model.predict(X_train), y_train)
-    print('Test set error:')
+    print('Test set:')
     utility.print_error(model.predict(X_test), y_test)
     print()
 
