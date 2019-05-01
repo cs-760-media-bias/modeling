@@ -1,0 +1,17 @@
+Loading data...
+Standardizing data...
+
+Running neural network with 3 layers of 100 units...
+Training set:
+	Mean squared error:    368985.0248355977
+	Mean absolute error:   95.83427040073008
+	Median absolute error: 24.196967092292724
+	R squared score:       0.17788614646210577
+	Mean label value:      104.45023431725318
+Test set:
+	Mean squared error:    384704.2409373695
+	Mean absolute error:   97.62586650869807
+	Median absolute error: 24.13974397199423
+	R squared score:       0.08386938123847432
+	Mean label value:      104.2482965631097
+
