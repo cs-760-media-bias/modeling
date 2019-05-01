@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
 import numpy as np
 import os
 from sklearn.model_selection import train_test_split
-from tweet2vec.tweet2vec import tokenize, Doc2Vec
+from tweet2vec.tweet2vec import Doc2Vec
 
 IN_PATH = 'tweets_tidy'
 OUT_PATH = 'preprocessed'

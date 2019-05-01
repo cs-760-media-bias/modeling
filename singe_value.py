@@ -1,8 +1,5 @@
 import numpy as np
-import os
 import utility
-
-IN_PATH = 'preprocessed'
 
 
 def predict_mean(y_train, y_test):
@@ -17,13 +14,7 @@ def predict_mean(y_train, y_test):
 
 
 if __name__ == '__main__':
-    print('Loading data...')
-    y_train = np.loadtxt(os.path.join(IN_PATH, 'y_train.csv'), delimiter=',')
-    y_test = np.loadtxt(os.path.join(IN_PATH, 'y_test.csv'), delimiter=',')
+    X_train, X_test, y_train, y_test = utility.load()
     print()
-
-    # Use favorite_count as the label
-    y_train = y_train[:, 3]
-    y_test = y_test[:, 3]
 
     predict_mean(y_train, y_test)
