@@ -1,0 +1,20 @@
+Loading data...
+Standardizing data...
+
+Running KNN with 10-fold cross-validation...
+Possible k values:
+[1, 2, 3, 5, 10]
+Chosen k value: 10
+Training set:
+	Mean squared error:    338209.50504406804
+	Mean absolute error:   89.94235607967912
+	Median absolute error: 15.100000000000001
+	R squared score:       0.2464552738453082
+	Mean label value:      104.45023431725318
+Test set:
+	Mean squared error:    402038.71630781924
+	Mean absolute error:   100.1927375056281
+	Median absolute error: 17.1
+	R squared score:       0.042589244559081973
+	Mean label value:      104.2482965631097
+

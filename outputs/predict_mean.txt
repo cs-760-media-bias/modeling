@@ -1,0 +1,17 @@
+Loading data...
+
+Running mean-value prediction model...
+Mean value: 104.45023431725318
+Training set:
+	Mean squared error:    448824.72573318565
+	Mean absolute error:   141.42169792162196
+	Median absolute error: 94.45023431725318
+	R squared score:       0.0
+	Mean label value:      104.45023431725318
+Test set:
+	Mean squared error:    419922.9568554235
+	Mean absolute error:   141.23109968531838
+	Median absolute error: 94.45023431725318
+	R squared score:       -9.711033843728956e-08
+	Mean label value:      104.2482965631097
+

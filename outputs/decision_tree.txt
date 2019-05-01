@@ -1,0 +1,20 @@
+Loading data...
+Standardizing data...
+
+Running regression tree with 10-fold cross-validation
+Possible max number of leaf nodes:
+[2, 5, 10, 15, 20, 25, 30]
+Chosen max number of leaf nodes: 5
+Training set:
+	Mean squared error:    417923.73308337753
+	Mean absolute error:   116.7408170808004
+	Median absolute error: 43.32132615585853
+	R squared score:       0.06884868608637651
+	Mean label value:      104.45023431725318
+Test set:
+	Mean squared error:    395673.4896653606
+	Mean absolute error:   117.02553616048928
+	Median absolute error: 43.32132615585853
+	R squared score:       0.05774732809958116
+	Mean label value:      104.2482965631097
+
