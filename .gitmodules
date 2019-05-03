@@ -1,3 +1,6 @@
 [submodule "tweet2vec"]
 	path = tweet2vec
 	url = https://github.com/cs-760-media-bias/tweet2vec.git
+[submodule "bag-of-words"]
+	path = bag-of-words
+	url = https://github.com/cs-760-media-bias/bag-of-words.git
