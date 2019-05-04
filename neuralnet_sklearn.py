@@ -18,4 +18,4 @@ if __name__ == '__main__':
     X_train, X_test = utility.standardize(X_train, X_test)
     print()
 
-    mlp_regressor(X_train, X_test, y_train, y_test, 5, 100)
+    mlp_regressor(X_train, X_test, y_train, y_test, 3, 100)
